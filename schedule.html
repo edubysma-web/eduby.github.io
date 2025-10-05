@@ -117,7 +117,7 @@
         
         .days-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 20px;
         }
         
@@ -156,6 +156,7 @@
         
         .schedule-list {
             list-style: none;
+            min-height: 100px;
         }
         
         .schedule-item {
@@ -165,10 +166,15 @@
             border-radius: 8px;
             border-left: 4px solid #4facfe;
             transition: transform 0.3s;
+            position: relative;
         }
         
         .schedule-item:hover {
             transform: translateX(5px);
+        }
+        
+        .schedule-item:hover .action-buttons {
+            opacity: 1;
         }
         
         .schedule-time {
@@ -186,6 +192,44 @@
         .schedule-topic {
             font-size: 0.9em;
             color: #666;
+        }
+        
+        .action-buttons {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .btn-edit, .btn-delete {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.3s;
+        }
+        
+        .btn-edit {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: #059669;
+        }
+        
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #dc2626;
         }
         
         .add-schedule {
@@ -256,6 +300,118 @@
             font-size: 0.9em;
             color: #666;
         }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 2em;
+            cursor: pointer;
+            color: #999;
+            background: none;
+            border: none;
+        }
+        
+        .close-modal:hover {
+            color: #333;
+        }
+        
+        .modal-title {
+            color: #4facfe;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0f4ff;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        
+        .btn-primary, .btn-secondary {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #4facfe;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #3a8bd6;
+        }
+        
+        .btn-secondary {
+            background: #e0f4ff;
+            color: #4facfe;
+        }
+        
+        .btn-secondary:hover {
+            background: #d0e9ff;
+        }
     </style>
 </head>
 <body>
@@ -277,7 +433,7 @@
             <div class="schedule-container">
                 <div class="week-selector">
                     <button class="week-btn" onclick="changeWeek(-1)">← Minggu Lalu</button>
-                    <div class="current-week" id="current-week-10">Minggu Ini</div>
+                    <div class="current-week">Minggu Ini</div>
                     <button class="week-btn" onclick="changeWeek(1)">Minggu Depan →</button>
                 </div>
                 <div class="days-grid" id="schedule-kelas10"></div>
@@ -346,184 +502,124 @@
             <a href="index.html">← Kembali ke Beranda</a>
         </div>
     </div>
+    
+    <!-- Modal Form Jadwal -->
+    <div class="modal" id="scheduleModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+            <h2 class="modal-title" id="modalTitle">Tambah Jadwal Baru</h2>
+            
+            <form id="scheduleForm" onsubmit="saveSchedule(event)">
+                <div class="form-group">
+                    <label>Hari</label>
+                    <input type="text" id="formDay" readonly style="background: #f8fcff;">
+                </div>
+                
+                <div class="form-group">
+                    <label>Waktu Mulai</label>
+                    <input type="time" id="formStartTime" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Waktu Selesai</label>
+                    <input type="time" id="formEndTime" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Mata Pelajaran</label>
+                    <input type="text" id="formSubject" placeholder="Contoh: Matematika" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Topik/Materi</label>
+                    <input type="text" id="formTopic" placeholder="Contoh: Trigonometri" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Tipe Kegiatan</label>
+                    <select id="formType" required>
+                        <option value="regular">Pelajaran Reguler</option>
+                        <option value="study">Belajar Mandiri</option>
+                        <option value="exam">Ujian/Quiz</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Batal</button>
+                    <button type="submit" class="btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
-        const scheduleData = {
+        let currentClass = 'kelas10';
+        let editingScheduleId = null;
+        
+        // Data jadwal default untuk setiap kelas
+        const defaultScheduleData = {
             kelas10: {
                 "Senin": [
-                    { time: "07:00 - 08:30", subject: "Matematika", topic: "Trigonometri", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Bahasa Indonesia", topic: "Teks Eksposisi", type: "regular" },
-                    { time: "10:15 - 11:45", subject: "Fisika", topic: "Gerak Lurus", type: "regular" },
-                    { time: "13:00 - 14:30", subject: "Kimia", topic: "Struktur Atom", type: "regular" }
+                    { id: 1, time: "07:00 - 08:30", subject: "Matematika", topic: "Trigonometri", type: "regular" },
+                    { id: 2, time: "08:30 - 10:00", subject: "Bahasa Indonesia", topic: "Teks Eksposisi", type: "regular" }
                 ],
                 "Selasa": [
-                    { time: "07:00 - 08:30", subject: "Biologi", topic: "Klasifikasi Makhluk Hidup", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Bahasa Inggris", topic: "Reading Comprehension", type: "regular" },
-                    { time: "10:15 - 11:45", subject: "Ekonomi", topic: "Ilmu Ekonomi", type: "regular" },
-                    { time: "15:00 - 16:30", subject: "Matematika", topic: "Latihan Soal", type: "study" }
+                    { id: 3, time: "07:00 - 08:30", subject: "Biologi", topic: "Klasifikasi Makhluk Hidup", type: "regular" }
                 ],
-                "Rabu": [
-                    { time: "07:00 - 08:30", subject: "Geografi", topic: "Peta dan Pengindraan Jauh", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Sosiologi", topic: "Interaksi Sosial", type: "regular" },
-                    { time: "10:15 - 11:45", subject: "Sejarah Indonesia", topic: "Peradaban Hindu-Buddha", type: "regular" },
-                    { time: "13:00 - 14:30", subject: "Fisika", topic: "Review Vektor", type: "study" }
-                ],
-                "Kamis": [
-                    { time: "07:00 - 08:30", subject: "Matematika", topic: "Quiz Trigonometri", type: "exam" },
-                    { time: "08:30 - 10:00", subject: "Kimia", topic: "Sistem Periodik", type: "regular" },
-                    { time: "10:15 - 11:45", subject: "Bahasa Indonesia", topic: "Teks Anekdot", type: "regular" },
-                    { time: "15:00 - 16:30", subject: "Biologi", topic: "Belajar Mandiri", type: "study" }
-                ],
-                "Jumat": [
-                    { time: "07:00 - 08:30", subject: "Bahasa Inggris", topic: "Grammar Practice", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Fisika", topic: "Hukum Newton", type: "regular" },
-                    { time: "10:15 - 11:30", subject: "Ekonomi", topic: "Diskusi Kelompok", type: "regular" }
-                ],
-                "Sabtu": [
-                    { time: "08:00 - 10:00", subject: "Review Mingguan", topic: "Semua Mata Pelajaran", type: "study" },
-                    { time: "10:30 - 12:00", subject: "Latihan Soal", topic: "Matematika & Fisika", type: "study" }
-                ],
-                "Minggu": [
-                    { time: "09:00 - 11:00", subject: "Belajar Mandiri", topic: "Materi yang Belum Dikuasai", type: "study" }
-                ]
+                "Rabu": [],
+                "Kamis": [],
+                "Jumat": [],
+                "Sabtu": [],
+                "Minggu": []
             },
             "kelas11-ipa": {
                 "Senin": [
-                    { time: "07:00 - 08:30", subject: "Matematika Lanjut", topic: "Polinomial", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Fisika", topic: "Kinematik Gerak", type: "regular" },
-                    { time: "10:15 - 11:45", subject: "Kimia", topic: "Struktur Atom", type: "regular" },
-                    { time: "13:00 - 14:30", subject: "Biologi", topic: "Sel", type: "regular" }
+                    { id: 1, time: "07:00 - 08:30", subject: "Matematika Lanjut", topic: "Polinomial", type: "regular" }
                 ],
-                "Selasa": [
-                    { time: "07:00 - 08:30", subject: "Matematika Wajib", topic: "Lingkaran", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Bahasa Indonesia", topic: "Teks Argumentasi", type: "regular" },
-                    { time: "10:15 - 11:45", subject: "Fisika", topic: "Fluida Statis", type: "regular" }
-                ],
-                "Rabu": [
-                    { time: "07:00 - 08:30", subject: "Kimia", topic: "Ikatan Kimia", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Biologi", topic: "Transport Aktif & Pasif", type: "regular" },
-                    { time: "10:15 - 11:45", subject: "Matematika Lanjut", topic: "Matriks", type: "regular" }
-                ],
-                "Kamis": [
-                    { time: "07:00 - 08:30", subject: "Fisika", topic: "Gerak Parabola", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Matematika Wajib", topic: "Quiz Lingkaran", type: "exam" },
-                    { time: "15:00 - 16:30", subject: "Review", topic: "Kimia & Biologi", type: "study" }
-                ],
-                "Jumat": [
-                    { time: "07:00 - 08:30", subject: "Biologi", topic: "Sistem Peredaran Darah", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Bahasa Indonesia", topic: "Cerpen", type: "regular" }
-                ],
-                "Sabtu": [
-                    { time: "08:00 - 10:00", subject: "Matematika", topic: "Latihan Soal", type: "study" },
-                    { time: "10:30 - 12:00", subject: "Fisika", topic: "Praktikum", type: "study" }
-                ],
-                "Minggu": [
-                    { time: "09:00 - 11:00", subject: "Persiapan Ujian", topic: "Review Materi Minggu Ini", type: "study" }
-                ]
+                "Selasa": [],
+                "Rabu": [],
+                "Kamis": [],
+                "Jumat": [],
+                "Sabtu": [],
+                "Minggu": []
             },
             "kelas11-ips": {
                 "Senin": [
-                    { time: "07:00 - 08:30", subject: "Ekonomi", topic: "Pendapatan Nasional", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Geografi", topic: "Flora dan Fauna", type: "regular" },
-                    { time: "10:15 - 11:45", subject: "Sosiologi", topic: "Kelompok Sosial", type: "regular" }
+                    { id: 1, time: "07:00 - 08:30", subject: "Ekonomi", topic: "Pendapatan Nasional", type: "regular" }
                 ],
-                "Selasa": [
-                    { time: "07:00 - 08:30", subject: "Sejarah Indonesia", topic: "Kolonialisme", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Bahasa Indonesia", topic: "Teks Berita", type: "regular" },
-                    { time: "10:15 - 11:45", subject: "Ekonomi", topic: "Pertumbuhan Ekonomi", type: "regular" }
-                ],
-                "Rabu": [
-                    { time: "07:00 - 08:30", subject: "Geografi", topic: "SDA Indonesia", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Sejarah Peminatan", topic: "Kerajaan Maritim", type: "regular" },
-                    { time: "10:15 - 11:45", subject: "Sosiologi", topic: "Permasalahan Sosial", type: "regular" }
-                ],
-                "Kamis": [
-                    { time: "07:00 - 08:30", subject: "Ekonomi", topic: "Quiz APBN & APBD", type: "exam" },
-                    { time: "08:30 - 10:00", subject: "Sejarah Indonesia", topic: "Pergerakan Nasional", type: "regular" },
-                    { time: "15:00 - 16:30", subject: "Review", topic: "Sosiologi", type: "study" }
-                ],
-                "Jumat": [
-                    { time: "07:00 - 08:30", subject: "Geografi", topic: "Mitigasi Bencana", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Bahasa Indonesia", topic: "Drama", type: "regular" }
-                ],
-                "Sabtu": [
-                    { time: "08:00 - 10:00", subject: "Ekonomi", topic: "Latihan Soal", type: "study" },
-                    { time: "10:30 - 12:00", subject: "Sejarah", topic: "Diskusi Kelompok", type: "study" }
-                ],
-                "Minggu": [
-                    { time: "09:00 - 11:00", subject: "Belajar Mandiri", topic: "Review Semua Pelajaran", type: "study" }
-                ]
+                "Selasa": [],
+                "Rabu": [],
+                "Kamis": [],
+                "Jumat": [],
+                "Sabtu": [],
+                "Minggu": []
             },
             "kelas12-ipa": {
                 "Senin": [
-                    { time: "07:00 - 08:30", subject: "Matematika Lanjut", topic: "Limit Fungsi", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Fisika", topic: "Listrik Statis", type: "regular" },
-                    { time: "10:15 - 11:45", subject: "Kimia", topic: "Reaksi Redoks", type: "regular" },
-                    { time: "13:00 - 14:30", subject: "Biologi", topic: "Materi Genetik", type: "regular" }
+                    { id: 1, time: "07:00 - 08:30", subject: "Matematika Lanjut", topic: "Limit Fungsi", type: "regular" }
                 ],
-                "Selasa": [
-                    { time: "07:00 - 08:30", subject: "Matematika Wajib", topic: "Statistika", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Kimia", topic: "Sel Volta", type: "regular" },
-                    { time: "10:15 - 11:45", subject: "Biologi", topic: "Genetika", type: "regular" },
-                    { time: "15:00 - 17:00", subject: "UTBK Preparation", topic: "TPS", type: "study" }
-                ],
-                "Rabu": [
-                    { time: "07:00 - 08:30", subject: "Fisika", topic: "Induksi Magnetik", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Matematika Lanjut", topic: "Turunan", type: "regular" },
-                    { time: "10:15 - 11:45", subject: "Biologi", topic: "Evolusi", type: "regular" }
-                ],
-                "Kamis": [
-                    { time: "07:00 - 08:30", subject: "Kimia", topic: "Sel Elektrolisis", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Fisika", topic: "Quiz Listrik", type: "exam" },
-                    { time: "15:00 - 17:00", subject: "UTBK Preparation", topic: "Saintek", type: "study" }
-                ],
-                "Jumat": [
-                    { time: "07:00 - 08:30", subject: "Matematika Wajib", topic: "Peluang", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Biologi", topic: "Bioteknologi", type: "regular" }
-                ],
-                "Sabtu": [
-                    { time: "08:00 - 10:00", subject: "Try Out UTBK", topic: "Simulasi Ujian", type: "exam" },
-                    { time: "10:30 - 12:00", subject: "Pembahasan", topic: "Try Out", type: "study" }
-                ],
-                "Minggu": [
-                    { time: "09:00 - 12:00", subject: "UTBK Intensive", topic: "Latihan Soal & Review", type: "study" }
-                ]
+                "Selasa": [],
+                "Rabu": [],
+                "Kamis": [],
+                "Jumat": [],
+                "Sabtu": [],
+                "Minggu": []
             },
             "kelas12-ips": {
                 "Senin": [
-                    { time: "07:00 - 08:30", subject: "Ekonomi", topic: "Akuntansi Perusahaan Jasa", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Geografi", topic: "Konsep Wilayah", type: "regular" },
-                    { time: "10:15 - 11:45", subject: "Sosiologi", topic: "Perubahan Sosial", type: "regular" },
-                    { time: "15:00 - 17:00", subject: "UTBK Preparation", topic: "TPS", type: "study" }
+                    { id: 1, time: "07:00 - 08:30", subject: "Ekonomi", topic: "Akuntansi Perusahaan Jasa", type: "regular" }
                 ],
-                "Selasa": [
-                    { time: "07:00 - 08:30", subject: "Sejarah Indonesia", topic: "Era Orde Baru", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Ekonomi", topic: "Akuntansi Dagang", type: "regular" },
-                    { time: "10:15 - 11:45", subject: "Geografi", topic: "Interaksi Desa-Kota", type: "regular" }
-                ],
-                "Rabu": [
-                    { time: "07:00 - 08:30", subject: "Sosiologi", topic: "Globalisasi", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Sejarah Peminatan", topic: "Perang Dingin", type: "regular" },
-                    { time: "10:15 - 11:45", subject: "Ekonomi", topic: "Quiz Akuntansi", type: "exam" }
-                ],
-                "Kamis": [
-                    { time: "07:00 - 08:30", subject: "Geografi", topic: "Pengindraan Jauh & SIG", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Sejarah Indonesia", topic: "Era Reformasi", type: "regular" },
-                    { time: "15:00 - 17:00", subject: "UTBK Preparation", topic: "Soshum", type: "study" }
-                ],
-                "Jumat": [
-                    { time: "07:00 - 08:30", subject: "Sosiologi", topic: "Ketimpangan Sosial", type: "regular" },
-                    { time: "08:30 - 10:00", subject: "Ekonomi", topic: "Review Materi", type: "regular" }
-                ],
-                "Sabtu": [
-                    { time: "08:00 - 10:00", subject: "Try Out UTBK", topic: "Simulasi Ujian", type: "exam" },
-                    { time: "10:30 - 12:00", subject: "Pembahasan", topic: "Try Out", type: "study" }
-                ],
-                "Minggu": [
-                    { time: "09:00 - 12:00", subject: "UTBK Intensive", topic: "Latihan Soal & Review", type: "study" }
-                ]
+                "Selasa": [],
+                "Rabu": [],
+                "Kamis": [],
+                "Jumat": [],
+                "Sabtu": [],
+                "Minggu": []
             }
         };
+        
+        // Load schedule dari memori atau gunakan default
+        let scheduleData = JSON.parse(JSON.stringify(defaultScheduleData));
         
         const days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
         
@@ -551,11 +647,15 @@
                                 <div class="schedule-time">${item.time}</div>
                                 <div class="schedule-subject">${item.subject}</div>
                                 <div class="schedule-topic">${item.topic}</div>
+                                <div class="action-buttons">
+                                    <button class="btn-edit" onclick="editSchedule('${classId}', '${day}', ${item.id})">✏️</button>
+                                    <button class="btn-delete" onclick="deleteSchedule('${classId}', '${day}', ${item.id})">🗑️</button>
+                                </div>
                             </li>
                         `;
                     }).join('');
                 } else {
-                    scheduleHTML = '<div class="empty-schedule">Tidak ada jadwal</div>';
+                    scheduleHTML = '<div class="empty-schedule">📝 Belum ada jadwal<br><small>Klik tombol di bawah untuk menambah</small></div>';
                 }
                 
                 dayCard.innerHTML = `
@@ -566,7 +666,7 @@
                     <ul class="schedule-list">
                         ${scheduleHTML}
                     </ul>
-                    <button class="add-schedule" onclick="addSchedule('${day}', '${classId}')">
+                    <button class="add-schedule" onclick="openAddModal('${day}', '${classId}')">
                         ➕ Tambah Jadwal
                     </button>
                 `;
@@ -576,6 +676,7 @@
         }
         
         function showClass(classId) {
+            currentClass = classId;
             document.querySelectorAll('.content-section').forEach(section => {
                 section.classList.remove('active');
             });
@@ -589,22 +690,120 @@
         }
         
         function changeWeek(direction) {
-            const weekText = direction > 0 ? 'Minggu Depan' : 'Minggu Lalu';
+            const weekText = direction > 0 ? 'Minggu Depan' : (direction < 0 ? 'Minggu Lalu' : 'Minggu Ini');
             document.querySelectorAll('.current-week').forEach(el => {
                 el.textContent = weekText;
             });
         }
         
-        function addSchedule(day, classId) {
-            alert(`Fitur tambah jadwal untuk ${day} (${classId}) sedang dalam pengembangan.\n\nFitur yang akan datang:\n• Tambah jadwal baru\n• Edit jadwal\n• Hapus jadwal\n• Notifikasi pengingat`);
+        function openAddModal(day, classId) {
+            editingScheduleId = null;
+            document.getElementById('modalTitle').textContent = 'Tambah Jadwal Baru';
+            document.getElementById('formDay').value = day;
+            document.getElementById('scheduleForm').setAttribute('data-day', day);
+            document.getElementById('scheduleForm').setAttribute('data-class', classId);
+            
+            // Reset form
+            document.getElementById('formStartTime').value = '';
+            document.getElementById('formEndTime').value = '';
+            document.getElementById('formSubject').value = '';
+            document.getElementById('formTopic').value = '';
+            document.getElementById('formType').value = 'regular';
+            
+            document.getElementById('scheduleModal').classList.add('active');
         }
         
-        // Render all schedules
-        renderSchedule('kelas10');
-        renderSchedule('kelas11-ipa');
-        renderSchedule('kelas11-ips');
-        renderSchedule('kelas12-ipa');
-        renderSchedule('kelas12-ips');
+        function editSchedule(classId, day, scheduleId) {
+            const schedule = scheduleData[classId][day].find(s => s.id === scheduleId);
+            if (!schedule) return;
+            
+            editingScheduleId = scheduleId;
+            document.getElementById('modalTitle').textContent = 'Edit Jadwal';
+            document.getElementById('formDay').value = day;
+            document.getElementById('scheduleForm').setAttribute('data-day', day);
+            document.getElementById('scheduleForm').setAttribute('data-class', classId);
+            
+            // Parse time
+            const [startTime, endTime] = schedule.time.split(' - ');
+            document.getElementById('formStartTime').value = startTime;
+            document.getElementById('formEndTime').value = endTime;
+            document.getElementById('formSubject').value = schedule.subject;
+            document.getElementById('formTopic').value = schedule.topic;
+            document.getElementById('formType').value = schedule.type;
+            
+            document.getElementById('scheduleModal').classList.add('active');
+        }
+        
+        function deleteSchedule(classId, day, scheduleId) {
+            if (!confirm('Yakin ingin menghapus jadwal ini?')) return;
+            
+            scheduleData[classId][day] = scheduleData[classId][day].filter(s => s.id !== scheduleId);
+            renderSchedule(classId);
+        }
+        
+        function saveSchedule(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const day = form.getAttribute('data-day');
+            const classId = form.getAttribute('data-class');
+            
+            const startTime = document.getElementById('formStartTime').value;
+            const endTime = document.getElementById('formEndTime').value;
+            const subject = document.getElementById('formSubject').value;
+            const topic = document.getElementById('formTopic').value;
+            const type = document.getElementById('formType').value;
+            
+            const scheduleItem = {
+                id: editingScheduleId || Date.now(),
+                time: `${startTime} - ${endTime}`,
+                subject: subject,
+                topic: topic,
+                type: type
+            };
+            
+            if (editingScheduleId) {
+                // Edit existing
+                const index = scheduleData[classId][day].findIndex(s => s.id === editingScheduleId);
+                if (index !== -1) {
+                    scheduleData[classId][day][index] = scheduleItem;
+                }
+            } else {
+                // Add new
+                if (!scheduleData[classId][day]) {
+                    scheduleData[classId][day] = [];
+                }
+                scheduleData[classId][day].push(scheduleItem);
+            }
+            
+            // Sort by time
+            scheduleData[classId][day].sort((a, b) => {
+                const timeA = a.time.split(' - ')[0];
+                const timeB = b.time.split(' - ')[0];
+                return timeA.localeCompare(timeB);
+            });
+            
+            renderSchedule(classId);
+            closeModal();
+        }
+        
+        function closeModal() {
+            document.getElementById('scheduleModal').classList.remove('active');
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('scheduleModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+        
+        // Render all schedules on page load
+        const classes = ['kelas10', 'kelas11-ipa', 'kelas11-ips', 'kelas12-ipa', 'kelas12-ips'];
+        classes.forEach(classId => {
+            renderSchedule(classId);
+        });
     </script>
 </body>
 </html>
