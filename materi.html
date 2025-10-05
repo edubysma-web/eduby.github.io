@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Materi & Video Pembelajaran</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: #222;
+
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #6a1b9a;
+            margin-bottom: 10px;
+        }
+        
+        .nav-pills {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .nav-pills button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            background: #f3e5f5;
+            color: #6a1b9a;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .nav-pills button.active {
+            background: #6a1b9a;
+            color: white;
+        }
+        
+        .nav-pills button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(106,27,154,0.3);
+        }
+        
+        .content-section {
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        
+        .subject-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+        
+        .subject-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .subject-title {
+            color: #6a1b9a;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .topic-list {
+            list-style: none;
+        }
+        
+        .topic-item {
+            padding: 12px;
+            margin: 8px 0;
+            background: #f3e5f5;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        
+        .topic-item:hover {
+            background: #e1bee7;
+        }
+        
+        .topic-name {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 100px;
+        }
+        
+        .btn-materi {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-materi:hover {
+            background: #059669;
+        }
+        
+        .btn-video {
+            background: #6a1b9a;
+            color: white;
+        }
+        
+        .btn-video:hover {
+            background: #4a148c;
+        }
+        
+        .icon {
+            font-size: 1.5em;
+        }
+        
+        .back-nav {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .back-nav a {
+            display: inline-block;
+            padding: 12px 30px;
+            background: white;
+            color: #6a1b9a;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .back-nav a:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255,255,255,0.3);
+            background: #f3e5f5;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 2em;
+            cursor: pointer;
+            color: #999;
+            background: none;
+            border: none;
+        }
+        
+        .close-modal:hover {
+            color: #333;
+        }
+        
+        .modal-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f3e5f5;
+        }
+        
+        .modal-header h2 {
+            color: #6a1b9a;
+            margin-bottom: 5px;
+        }
+        
+        .modal-header p {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .materi-content {
+            line-height: 1.8;
+            color: #333;
+        }
+        
+        .materi-content h3 {
+            color: #6a1b9a;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .materi-content ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .materi-content li {
+            margin-bottom: 8px;
+        }
+        
+        .materi-placeholder {
+            background: #f3e5f5;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #6a1b9a;
+        }
+        
+        .video-placeholder {
+            background: #4a148c;
+            color: white;
+            padding: 60px 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .video-placeholder p {
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Materi & Video Pembelajaran</h1>
+            <p>Pelajari materi lengkap dengan video pembelajaran interaktif</p>
+            
+            <div class="nav-pills">
+                <button class="active" onclick="showClass('kelas10')">Kelas 10</button>
+                <button onclick="showClass('kelas11-ipa')">Kelas 11 IPA</button>
+                <button onclick="showClass('kelas11-ips')">Kelas 11 IPS</button>
+                <button onclick="showClass('kelas12-ipa')">Kelas 12 IPA</button>
+                <button onclick="showClass('kelas12-ips')">Kelas 12 IPS</button>
+            </div>
+        </header>
+        
+        <!-- KELAS 10 -->
+        <div id="kelas10" class="content-section active">
+            <div class="subjects-grid" id="subjects-kelas10"></div>
+        </div>
+        
+        <!-- KELAS 11 IPA -->
+        <div id="kelas11-ipa" class="content-section">
+            <div class="subjects-grid" id="subjects-kelas11-ipa"></div>
+        </div>
+        
+        <!-- KELAS 11 IPS -->
+        <div id="kelas11-ips" class="content-section">
+            <div class="subjects-grid" id="subjects-kelas11-ips"></div>
+        </div>
+        
+        <!-- KELAS 12 IPA -->
+        <div id="kelas12-ipa" class="content-section">
+            <div class="subjects-grid" id="subjects-kelas12-ipa"></div>
+        </div>
+        
+        <!-- KELAS 12 IPS -->
+        <div id="kelas12-ips" class="content-section">
+            <div class="subjects-grid" id="subjects-kelas12-ips"></div>
+        </div>
+        
+        <div class="back-nav">
+            <a href="javascript:history.back()">← Kembali ke Beranda</a>
+        </div>
+    </div>
+    
+    <!-- Modal Materi -->
+    <div class="modal" id="materiModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('materiModal')">&times;</button>
+            <div class="modal-header">
+                <h2 id="materiTitle"></h2>
+                <p id="materiSubject"></p>
+            </div>
+            <div class="materi-content" id="materiContent"></div>
+        </div>
+    </div>
+    
+    <!-- Modal Video -->
+    <div class="modal" id="videoModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('videoModal')">&times;</button>
+            <div class="modal-header">
+                <h2 id="videoTitle"></h2>
+                <p id="videoSubject"></p>
+            </div>
+            <div class="video-placeholder">
+                <div style="font-size: 3em; margin-bottom: 10px;">🎥</div>
+                <h3>Video Pembelajaran</h3>
+                <p>Video untuk topik ini sedang dalam proses produksi.</p>
+                <p>Silakan gunakan materi tertulis terlebih dahulu.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const materiData = {
+            kelas10: {
+                "Bahasa Indonesia": ["Teks Observasi", "Teks Eksposisi", "Teks Anekdot", "Teks Negosiasi", "Cerita Rakyat"],
+                "Bahasa Inggris": ["Reading Text", "Expressions", "Grammar"],
+                "Kimia": ["Pendahuluan Ilmu Kimia", "Struktur Atom", "Sistem Periodik", "Ikatan Kimia", "Larutan Elektrolit dan Non Elektrolit", "Reaksi Redoks", "Stoikiometri"],
+                "Fisika": ["Besaran dan Satuan", "Vektor", "Gerak Lurus", "Parabola", "Gerak melingkar Beraturan", "Hukum Newton", "Usaha dan Energi"],
+                "Biologi": ["Ruang lingkup Biologi", "Keanekaragaman Hayati", "Klasifikasi Makhluk Hidup", "Virus", "Ekologi"],
+                "Matematika": ["Persamaan dan Pertidaksamaan Linear Nilai Mutlak Satu Variabel", "Sistem Persamaan Linear Tiga Variabel", "Fungsi", "Fungsi Linear-Persamaan Garis", "Trigonometri"],
+                "Ekonomi": ["Ilmu Ekonomi & permasalahannya", "Peran Pelaku Ekonomi dalam Kegiatan Ekonomi", "Keseimbangan Pasar & Struktur Pasar", "Lembaga Jasa Keuangan", "Alat pembayaran, sistem pembayaran, dan Bank Sentral"],
+                "Geografi": ["Pengatahuan dasar geografi", "Peta", "Pengindaraan jauh", "Dinamika planet bumi"],
+                "Sosiologi": ["Sosiologi sebagai ilmu", "Interaksi sosial", "Nilai dan norma", "Sosialisasi", "Lembaga sosial", "Penyimpangan Sosial"],
+                "Sejarah Indonesia": ["Pengantar Ilmu sejarah", "Konsep dasar ilmu sejarah", "Manusia Indonesia masa praksara", "Peradaban hindu-budha nusantara", "Peradaban islam nusantara"]
+            },
+            "kelas11-ipa": {
+                "Matematika Wajib": ["Fungsi Komposisi & Invers", "Lingkaran", "Diagram Pencar & Regresi Linear", "Korelasi Produk & Korelasi Determinasi"],
+                "Matematika Lanjut": ["Polinomial", "Matriks", "Transformasi", "Fungsi Trigonometri", "Fungsi Logaritma", "Fungsi Nilai Mutlak"],
+                "Fisika": ["Vektor", "Kinematik Gerak", "Gerak Parabola", "Fluida Statis", "Fluida Dinamis", "Suhu, Kalor dan Pemuaian"],
+                "Kimia": ["Teori Atom & Struktur Atom", "Tabel Periodik Unsur", "Ikatan Kimia, Bentuk Molekul", "Stokiometri Reaksi & Titrasi Asam Basa"],
+                "Biologi": ["Sel", "Transport Aktif dan Pasif", "Proses Reproduksi Pada Tumbuhan", "Sistem Perederan Darah", "Sistem Pencernaan", "Sistem Imun", "Hereditas"],
+                "Bahasa Indonesia": ["Teks Argumentasi", "Teks Berita", "Cerpen", "Resensi", "Drama", "Karya Ilmiah"]
+            },
+            "kelas11-ips": {
+                "Ekonomi": ["Pendapatan Nasional", "Pertumbuhan dan Pembangunan Ekonomi", "Ketenagakerjaan", "Inflasi dan Indeks Harga", "Kebijakan Moneter dan Fiskal", "APBN dan APBD", "Perpajakan", "Perdagangan Internasional", "Kerjasama Internasional"],
+                "Geografi": ["Indonesia sebagai Poros Maritim Dunia", "Persebaran Flora dan Fauna", "Sumber Daya Alam Indonesia", "Ketahanan Pangan, Industri, dan Energi Indonesia", "Dinamika Kependudukan", "Keragaman Budaya di Indonesia", "Mitigasi Bencana"],
+                "Sosiologi": ["Kelompok Sosial", "Permasalahan Sosial", "Perbedaan, Kesetaraan, dan Harmoni Sosial", "Kebudayaan dan Multikulturalisme", "Konflik Sosial", "Integrasi dan Reintegrasi"],
+                "Sejarah Indonesia": ["Kolonialisme dan Imperialisme Bangsa Eropa di Indonesia", "Perjuangan Kedaerahan Melawan Penjajahan", "Perjuangan dan Pergerakan Nasional Indonesia", "Pendudukan Jepang di Indonesia", "Proklamasi Kemerdekaan Indonesia dan Awal Republik", "Perjuangan & Revolusi Mempertahankan Kemerdekaan"],
+                "Sejarah Peminatan": ["Kerajaan Maritim Hindu-Buddha", "Kerajaan Maritim Islam", "Evolusi Peradaban Eropa", "Revolusi-Revolusi Besar di Dunia", "Perang Dunia I & II"],
+                "Bahasa Indonesia": ["Teks Argumentasi", "Teks Berita", "Cerpen", "Resensi", "Drama", "Karya Ilmiah"]
+            },
+            "kelas12-ipa": {
+                "Matematika Wajib": ["Dimensi Tiga", "Statistika", "Kaidah Pencacahan", "Kaidah Pencacahan (peluang)"],
+                "Matematika Lanjut": ["Limit", "Turunan", "Statistika Inferensial", "Distribusi Normal"],
+                "Fisika": ["Rangkaian Listrik Searah", "Listrik Statis", "Induksi Magnetik", "Fenomena Kuantum", "Atom"],
+                "Kimia": ["Sifat Koligatif Larutan", "Reaksi Redoks", "Sel Volta", "Sel Elektrolisis", "Kimia Unsur", "Polimer"],
+                "Biologi": ["Pertumbuhan & Perkembangan", "Enzim & Energi", "Katabolisme", "Materi Genetik", "Genetika & Pewarisan sifat", "Evolusi", "Bioteknologi"]
+            },
+            "kelas12-ips": {
+                "Ekonomi": ["Dasar-Dasar Akuntansi", "Akuntansi Perusahaan Jasa", "Akuntansi Perusahaan Dagang"],
+                "Geografi": ["Konsep Wilayah dan Tata Ruang", "Interaksi Keruangan Desa dan Kota", "Pemanfaatan Peta, Pengindraan Jauh, dan SIG", "Interaksi Negara Maju dan Negara Berkembang"],
+                "Sosiologi": ["Perubahan Sosial", "Modernisasi & Globalisasi", "Ketimpangan Sosial", "Pemberdayaan Komunitas & Kearifan Lokal"],
+                "Sejarah Indonesia": ["Perjuangan Melawan Ancaman Pemberontakan", "Indonesia Era Demokrasi Liberal", "Indonesia Era Demokrasi Terpimpin", "Indonesia Era Orde Baru", "Indonesia Era Reformasi"],
+                "Sejarah Peminatan": ["Respon Internasional terhadap Kemerdekaan RI", "Perkembangan IPTEK", "Peran Indonesia Masa Perang Dingin", "Perang Dingin", "Organisasi Regional & Global", "Perang Dunia I & II", "Sejarah Kontemporer Dunia"]
+            }
+        };
+        
+        const icons = {
+            "Bahasa Indonesia": "📖",
+            "Bahasa Inggris": "🌍",
+            "Kimia": "🧪",
+            "Fisika": "⚛️",
+            "Biologi": "🧬",
+            "Matematika": "📐",
+            "Matematika Wajib": "📊",
+            "Matematika Lanjut": "∑",
+            "Ekonomi": "💰",
+            "Geografi": "🌏",
+            "Sosiologi": "👥",
+            "Sejarah Indonesia": "🏛️",
+            "Sejarah Peminatan": "📜"
+        };
+        
+        function renderSubjects(classId) {
+            const container = document.getElementById(`subjects-${classId}`);
+            const data = materiData[classId];
+            
+            container.innerHTML = '';
+            
+            for (const [subject, topics] of Object.entries(data)) {
+                const card = document.createElement('div');
+                card.className = 'subject-card';
+                
+                const topicItems = topics.map(topic => `
+                    <li class="topic-item">
+                        <div class="topic-name">${topic}</div>
+                        <div class="action-buttons">
+                            <button class="btn btn-materi" onclick="openMateri('${subject}', '${topic}')">📄 Baca Materi</button>
+                            <button class="btn btn-video" onclick="openVideo('${subject}', '${topic}')">🎥 Tonton Video</button>
+                        </div>
+                    </li>
+                `).join('');
+                
+                card.innerHTML = `
+                    <div class="subject-title">
+                        <span class="icon">${icons[subject] || '📚'}</span>
+                        <span>${subject}</span>
+                    </div>
+                    <ul class="topic-list">
+                        ${topicItems}
+                    </ul>
+                `;
+                
+                container.appendChild(card);
+            }
+        }
+        
+        function showClass(classId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.nav-pills button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(classId).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        function openMateri(subject, topic) {
+            document.getElementById('materiTitle').textContent = topic;
+            document.getElementById('materiSubject').textContent = subject;
+            
+            const content = `
+                <div class="materi-placeholder">
+                    <h3>📚 Rangkuman Materi</h3>
+                    <p>Materi pembelajaran untuk <strong>${topic}</strong> mencakup konsep dasar, penjelasan detail, dan contoh soal.</p>
+                    
+                    <h3>🎯 Tujuan Pembelajaran</h3>
+                    <ul>
+                        <li>Memahami konsep dasar ${topic}</li>
+                        <li>Menerapkan teori dalam soal praktis</li>
+                        <li>Menganalisis permasalahan terkait materi</li>
+                    </ul>
+                    
+                    <h3>📝 Poin Penting</h3>
+                    <p>Materi lengkap untuk topik ini sedang dalam proses penyusunan. Untuk sementara, gunakan buku referensi atau konsultasi dengan guru mata pelajaran.</p>
+                    
+                    <p style="margin-top: 20px; padding: 15px; background: white; border-radius: 8px;">
+                        <strong>💡 Tips:</strong> Catat poin-poin penting dan latih dengan soal-soal untuk pemahaman lebih mendalam!
+                    </p>
+                </div>
+            `;
+            
+            document.getElementById('materiContent').innerHTML = content;
+            document.getElementById('materiModal').classList.add('active');
+        }
+        
+        function openVideo(subject, topic) {
+            document.getElementById('videoTitle').textContent = topic;
+            document.getElementById('videoSubject').textContent = subject;
+            document.getElementById('videoModal').classList.add('active');
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+        
+        // Render semua materi saat halaman dimuat
+        renderSubjects('kelas10');
+        renderSubjects('kelas11-ipa');
+        renderSubjects('kelas11-ips');
+        renderSubjects('kelas12-ipa');
+        renderSubjects('kelas12-ips');
+    </script>
+</body>
+</html>
+
