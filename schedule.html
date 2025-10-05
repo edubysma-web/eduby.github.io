@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jadwal Belajar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #4facfe;
+            margin-bottom: 10px;
+        }
+        
+        .nav-pills {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .nav-pills button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            background: #e0f4ff;
+            color: #4facfe;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .nav-pills button.active {
+            background: #4facfe;
+            color: white;
+        }
+        
+        .nav-pills button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79,172,254,0.3);
+        }
+        
+        .content-section {
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        .schedule-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .week-selector {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0f4ff;
+        }
+        
+        .week-nav {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .week-btn {
+            padding: 8px 16px;
+            background: #4facfe;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .week-btn:hover {
+            background: #3a8bd6;
+        }
+        
+        .current-week {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #4facfe;
+        }
+        
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .day-card {
+            background: #f8fcff;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #e0f4ff;
+            transition: all 0.3s;
+        }
+        
+        .day-card:hover {
+            box-shadow: 0 5px 15px rgba(79,172,254,0.2);
+            border-color: #4facfe;
+        }
+        
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0f4ff;
+        }
+        
+        .day-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #4facfe;
+        }
+        
+        .day-date {
+            color: #999;
+            font-size: 0.9em;
+        }
+        
+        .schedule-list {
+            list-style: none;
+        }
+        
+        .schedule-item {
+            padding: 12px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #4facfe;
+            transition: transform 0.3s;
+        }
+        
+        .schedule-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .schedule-time {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .schedule-subject {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 3px;
+        }
+        
+        .schedule-topic {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .add-schedule {
+            width: 100%;
+            padding: 12px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        .add-schedule:hover {
+            background: #059669;
+        }
+        
+        .empty-schedule {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+        }
+        
+        .back-nav {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .back-nav a {
+            display: inline-block;
+            padding: 12px 30px;
+            background: white;
+            color: #4facfe;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .back-nav a:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255,255,255,0.3);
+        }
+        
+        .legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .legend-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📅 Jadwal Belajar</h1>
+            <p>Atur dan kelola jadwal belajarmu dengan efektif</p>
+            
+            <div class="nav-pills">
+                <button class="active" onclick="showClass('kelas10')">Kelas 10</button>
+                <button onclick="showClass('kelas11-ipa')">Kelas 11 IPA</button>
+                <button onclick="showClass('kelas11-ips')">Kelas 11 IPS</button>
+                <button onclick="showClass('kelas12-ipa')">Kelas 12 IPA</button>
+                <button onclick="showClass('kelas12-ips')">Kelas 12 IPS</button>
+            </div>
+        </header>
+        
+        <div id="kelas10" class="content-section active">
+            <div class="schedule-container">
+                <div class="week-selector">
+                    <button class="week-btn" onclick="changeWeek(-1)">← Minggu Lalu</button>
+                    <div class="current-week" id="current-week-10">Minggu Ini</div>
+                    <button class="week-btn" onclick="changeWeek(1)">Minggu Depan →</button>
+                </div>
+                <div class="days-grid" id="schedule-kelas10"></div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #4facfe;"></div>
+                        <span class="legend-label">Pelajaran Reguler</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #10b981;"></div>
+                        <span class="legend-label">Belajar Mandiri</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f5576c;"></div>
+                        <span class="legend-label">Ujian/Quiz</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="kelas11-ipa" class="content-section">
+            <div class="schedule-container">
+                <div class="week-selector">
+                    <button class="week-btn" onclick="changeWeek(-1)">← Minggu Lalu</button>
+                    <div class="current-week">Minggu Ini</div>
+                    <button class="week-btn" onclick="changeWeek(1)">Minggu Depan →</button>
+                </div>
+                <div class="days-grid" id="schedule-kelas11-ipa"></div>
+            </div>
+        </div>
+        
+        <div id="kelas11-ips" class="content-section">
+            <div class="schedule-container">
+                <div class="week-selector">
+                    <button class="week-btn" onclick="changeWeek(-1)">← Minggu Lalu</button>
+                    <div class="current-week">Minggu Ini</div>
+                    <button class="week-btn" onclick="changeWeek(1)">Minggu Depan →</button>
+                </div>
+                <div class="days-grid" id="schedule-kelas11-ips"></div>
+            </div>
+        </div>
+        
+        <div id="kelas12-ipa" class="content-section">
+            <div class="schedule-container">
+                <div class="week-selector">
+                    <button class="week-btn" onclick="changeWeek(-1)">← Minggu Lalu</button>
+                    <div class="current-week">Minggu Ini</div>
+                    <button class="week-btn" onclick="changeWeek(1)">Minggu Depan →</button>
+                </div>
+                <div class="days-grid" id="schedule-kelas12-ipa"></div>
+            </div>
+        </div>
+        
+        <div id="kelas12-ips" class="content-section">
+            <div class="schedule-container">
+                <div class="week-selector">
+                    <button class="week-btn" onclick="changeWeek(-1)">← Minggu Lalu</button>
+                    <div class="current-week">Minggu Ini</div>
+                    <button class="week-btn" onclick="changeWeek(1)">Minggu Depan →</button>
+                </div>
+                <div class="days-grid" id="schedule-kelas12-ips"></div>
+            </div>
+        </div>
+        
+        <div class="back-nav">
+            <a href="index.html">← Kembali ke Beranda</a>
+        </div>
+    </div>
+
+    <script>
+        const scheduleData = {
+            kelas10: {
+                "Senin": [
+                    { time: "07:00 - 08:30", subject: "Matematika", topic: "Trigonometri", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Bahasa Indonesia", topic: "Teks Eksposisi", type: "regular" },
+                    { time: "10:15 - 11:45", subject: "Fisika", topic: "Gerak Lurus", type: "regular" },
+                    { time: "13:00 - 14:30", subject: "Kimia", topic: "Struktur Atom", type: "regular" }
+                ],
+                "Selasa": [
+                    { time: "07:00 - 08:30", subject: "Biologi", topic: "Klasifikasi Makhluk Hidup", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Bahasa Inggris", topic: "Reading Comprehension", type: "regular" },
+                    { time: "10:15 - 11:45", subject: "Ekonomi", topic: "Ilmu Ekonomi", type: "regular" },
+                    { time: "15:00 - 16:30", subject: "Matematika", topic: "Latihan Soal", type: "study" }
+                ],
+                "Rabu": [
+                    { time: "07:00 - 08:30", subject: "Geografi", topic: "Peta dan Pengindraan Jauh", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Sosiologi", topic: "Interaksi Sosial", type: "regular" },
+                    { time: "10:15 - 11:45", subject: "Sejarah Indonesia", topic: "Peradaban Hindu-Buddha", type: "regular" },
+                    { time: "13:00 - 14:30", subject: "Fisika", topic: "Review Vektor", type: "study" }
+                ],
+                "Kamis": [
+                    { time: "07:00 - 08:30", subject: "Matematika", topic: "Quiz Trigonometri", type: "exam" },
+                    { time: "08:30 - 10:00", subject: "Kimia", topic: "Sistem Periodik", type: "regular" },
+                    { time: "10:15 - 11:45", subject: "Bahasa Indonesia", topic: "Teks Anekdot", type: "regular" },
+                    { time: "15:00 - 16:30", subject: "Biologi", topic: "Belajar Mandiri", type: "study" }
+                ],
+                "Jumat": [
+                    { time: "07:00 - 08:30", subject: "Bahasa Inggris", topic: "Grammar Practice", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Fisika", topic: "Hukum Newton", type: "regular" },
+                    { time: "10:15 - 11:30", subject: "Ekonomi", topic: "Diskusi Kelompok", type: "regular" }
+                ],
+                "Sabtu": [
+                    { time: "08:00 - 10:00", subject: "Review Mingguan", topic: "Semua Mata Pelajaran", type: "study" },
+                    { time: "10:30 - 12:00", subject: "Latihan Soal", topic: "Matematika & Fisika", type: "study" }
+                ],
+                "Minggu": [
+                    { time: "09:00 - 11:00", subject: "Belajar Mandiri", topic: "Materi yang Belum Dikuasai", type: "study" }
+                ]
+            },
+            "kelas11-ipa": {
+                "Senin": [
+                    { time: "07:00 - 08:30", subject: "Matematika Lanjut", topic: "Polinomial", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Fisika", topic: "Kinematik Gerak", type: "regular" },
+                    { time: "10:15 - 11:45", subject: "Kimia", topic: "Struktur Atom", type: "regular" },
+                    { time: "13:00 - 14:30", subject: "Biologi", topic: "Sel", type: "regular" }
+                ],
+                "Selasa": [
+                    { time: "07:00 - 08:30", subject: "Matematika Wajib", topic: "Lingkaran", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Bahasa Indonesia", topic: "Teks Argumentasi", type: "regular" },
+                    { time: "10:15 - 11:45", subject: "Fisika", topic: "Fluida Statis", type: "regular" }
+                ],
+                "Rabu": [
+                    { time: "07:00 - 08:30", subject: "Kimia", topic: "Ikatan Kimia", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Biologi", topic: "Transport Aktif & Pasif", type: "regular" },
+                    { time: "10:15 - 11:45", subject: "Matematika Lanjut", topic: "Matriks", type: "regular" }
+                ],
+                "Kamis": [
+                    { time: "07:00 - 08:30", subject: "Fisika", topic: "Gerak Parabola", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Matematika Wajib", topic: "Quiz Lingkaran", type: "exam" },
+                    { time: "15:00 - 16:30", subject: "Review", topic: "Kimia & Biologi", type: "study" }
+                ],
+                "Jumat": [
+                    { time: "07:00 - 08:30", subject: "Biologi", topic: "Sistem Peredaran Darah", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Bahasa Indonesia", topic: "Cerpen", type: "regular" }
+                ],
+                "Sabtu": [
+                    { time: "08:00 - 10:00", subject: "Matematika", topic: "Latihan Soal", type: "study" },
+                    { time: "10:30 - 12:00", subject: "Fisika", topic: "Praktikum", type: "study" }
+                ],
+                "Minggu": [
+                    { time: "09:00 - 11:00", subject: "Persiapan Ujian", topic: "Review Materi Minggu Ini", type: "study" }
+                ]
+            },
+            "kelas11-ips": {
+                "Senin": [
+                    { time: "07:00 - 08:30", subject: "Ekonomi", topic: "Pendapatan Nasional", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Geografi", topic: "Flora dan Fauna", type: "regular" },
+                    { time: "10:15 - 11:45", subject: "Sosiologi", topic: "Kelompok Sosial", type: "regular" }
+                ],
+                "Selasa": [
+                    { time: "07:00 - 08:30", subject: "Sejarah Indonesia", topic: "Kolonialisme", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Bahasa Indonesia", topic: "Teks Berita", type: "regular" },
+                    { time: "10:15 - 11:45", subject: "Ekonomi", topic: "Pertumbuhan Ekonomi", type: "regular" }
+                ],
+                "Rabu": [
+                    { time: "07:00 - 08:30", subject: "Geografi", topic: "SDA Indonesia", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Sejarah Peminatan", topic: "Kerajaan Maritim", type: "regular" },
+                    { time: "10:15 - 11:45", subject: "Sosiologi", topic: "Permasalahan Sosial", type: "regular" }
+                ],
+                "Kamis": [
+                    { time: "07:00 - 08:30", subject: "Ekonomi", topic: "Quiz APBN & APBD", type: "exam" },
+                    { time: "08:30 - 10:00", subject: "Sejarah Indonesia", topic: "Pergerakan Nasional", type: "regular" },
+                    { time: "15:00 - 16:30", subject: "Review", topic: "Sosiologi", type: "study" }
+                ],
+                "Jumat": [
+                    { time: "07:00 - 08:30", subject: "Geografi", topic: "Mitigasi Bencana", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Bahasa Indonesia", topic: "Drama", type: "regular" }
+                ],
+                "Sabtu": [
+                    { time: "08:00 - 10:00", subject: "Ekonomi", topic: "Latihan Soal", type: "study" },
+                    { time: "10:30 - 12:00", subject: "Sejarah", topic: "Diskusi Kelompok", type: "study" }
+                ],
+                "Minggu": [
+                    { time: "09:00 - 11:00", subject: "Belajar Mandiri", topic: "Review Semua Pelajaran", type: "study" }
+                ]
+            },
+            "kelas12-ipa": {
+                "Senin": [
+                    { time: "07:00 - 08:30", subject: "Matematika Lanjut", topic: "Limit Fungsi", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Fisika", topic: "Listrik Statis", type: "regular" },
+                    { time: "10:15 - 11:45", subject: "Kimia", topic: "Reaksi Redoks", type: "regular" },
+                    { time: "13:00 - 14:30", subject: "Biologi", topic: "Materi Genetik", type: "regular" }
+                ],
+                "Selasa": [
+                    { time: "07:00 - 08:30", subject: "Matematika Wajib", topic: "Statistika", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Kimia", topic: "Sel Volta", type: "regular" },
+                    { time: "10:15 - 11:45", subject: "Biologi", topic: "Genetika", type: "regular" },
+                    { time: "15:00 - 17:00", subject: "UTBK Preparation", topic: "TPS", type: "study" }
+                ],
+                "Rabu": [
+                    { time: "07:00 - 08:30", subject: "Fisika", topic: "Induksi Magnetik", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Matematika Lanjut", topic: "Turunan", type: "regular" },
+                    { time: "10:15 - 11:45", subject: "Biologi", topic: "Evolusi", type: "regular" }
+                ],
+                "Kamis": [
+                    { time: "07:00 - 08:30", subject: "Kimia", topic: "Sel Elektrolisis", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Fisika", topic: "Quiz Listrik", type: "exam" },
+                    { time: "15:00 - 17:00", subject: "UTBK Preparation", topic: "Saintek", type: "study" }
+                ],
+                "Jumat": [
+                    { time: "07:00 - 08:30", subject: "Matematika Wajib", topic: "Peluang", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Biologi", topic: "Bioteknologi", type: "regular" }
+                ],
+                "Sabtu": [
+                    { time: "08:00 - 10:00", subject: "Try Out UTBK", topic: "Simulasi Ujian", type: "exam" },
+                    { time: "10:30 - 12:00", subject: "Pembahasan", topic: "Try Out", type: "study" }
+                ],
+                "Minggu": [
+                    { time: "09:00 - 12:00", subject: "UTBK Intensive", topic: "Latihan Soal & Review", type: "study" }
+                ]
+            },
+            "kelas12-ips": {
+                "Senin": [
+                    { time: "07:00 - 08:30", subject: "Ekonomi", topic: "Akuntansi Perusahaan Jasa", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Geografi", topic: "Konsep Wilayah", type: "regular" },
+                    { time: "10:15 - 11:45", subject: "Sosiologi", topic: "Perubahan Sosial", type: "regular" },
+                    { time: "15:00 - 17:00", subject: "UTBK Preparation", topic: "TPS", type: "study" }
+                ],
+                "Selasa": [
+                    { time: "07:00 - 08:30", subject: "Sejarah Indonesia", topic: "Era Orde Baru", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Ekonomi", topic: "Akuntansi Dagang", type: "regular" },
+                    { time: "10:15 - 11:45", subject: "Geografi", topic: "Interaksi Desa-Kota", type: "regular" }
+                ],
+                "Rabu": [
+                    { time: "07:00 - 08:30", subject: "Sosiologi", topic: "Globalisasi", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Sejarah Peminatan", topic: "Perang Dingin", type: "regular" },
+                    { time: "10:15 - 11:45", subject: "Ekonomi", topic: "Quiz Akuntansi", type: "exam" }
+                ],
+                "Kamis": [
+                    { time: "07:00 - 08:30", subject: "Geografi", topic: "Pengindraan Jauh & SIG", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Sejarah Indonesia", topic: "Era Reformasi", type: "regular" },
+                    { time: "15:00 - 17:00", subject: "UTBK Preparation", topic: "Soshum", type: "study" }
+                ],
+                "Jumat": [
+                    { time: "07:00 - 08:30", subject: "Sosiologi", topic: "Ketimpangan Sosial", type: "regular" },
+                    { time: "08:30 - 10:00", subject: "Ekonomi", topic: "Review Materi", type: "regular" }
+                ],
+                "Sabtu": [
+                    { time: "08:00 - 10:00", subject: "Try Out UTBK", topic: "Simulasi Ujian", type: "exam" },
+                    { time: "10:30 - 12:00", subject: "Pembahasan", topic: "Try Out", type: "study" }
+                ],
+                "Minggu": [
+                    { time: "09:00 - 12:00", subject: "UTBK Intensive", topic: "Latihan Soal & Review", type: "study" }
+                ]
+            }
+        };
+        
+        const days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
+        
+        function renderSchedule(classId) {
+            const container = document.getElementById(`schedule-${classId}`);
+            const data = scheduleData[classId];
+            
+            container.innerHTML = '';
+            
+            days.forEach(day => {
+                const dayCard = document.createElement('div');
+                dayCard.className = 'day-card';
+                
+                const schedules = data[day] || [];
+                
+                let scheduleHTML = '';
+                if (schedules.length > 0) {
+                    scheduleHTML = schedules.map(item => {
+                        let borderColor = '#4facfe';
+                        if (item.type === 'study') borderColor = '#10b981';
+                        if (item.type === 'exam') borderColor = '#f5576c';
+                        
+                        return `
+                            <li class="schedule-item" style="border-left-color: ${borderColor}">
+                                <div class="schedule-time">${item.time}</div>
+                                <div class="schedule-subject">${item.subject}</div>
+                                <div class="schedule-topic">${item.topic}</div>
+                            </li>
+                        `;
+                    }).join('');
+                } else {
+                    scheduleHTML = '<div class="empty-schedule">Tidak ada jadwal</div>';
+                }
+                
+                dayCard.innerHTML = `
+                    <div class="day-header">
+                        <div class="day-name">${day}</div>
+                        <div class="day-date">${schedules.length} kegiatan</div>
+                    </div>
+                    <ul class="schedule-list">
+                        ${scheduleHTML}
+                    </ul>
+                    <button class="add-schedule" onclick="addSchedule('${day}', '${classId}')">
+                        ➕ Tambah Jadwal
+                    </button>
+                `;
+                
+                container.appendChild(dayCard);
+            });
+        }
+        
+        function showClass(classId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.nav-pills button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(classId).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        function changeWeek(direction) {
+            const weekText = direction > 0 ? 'Minggu Depan' : 'Minggu Lalu';
+            document.querySelectorAll('.current-week').forEach(el => {
+                el.textContent = weekText;
+            });
+        }
+        
+        function addSchedule(day, classId) {
+            alert(`Fitur tambah jadwal untuk ${day} (${classId}) sedang dalam pengembangan.\n\nFitur yang akan datang:\n• Tambah jadwal baru\n• Edit jadwal\n• Hapus jadwal\n• Notifikasi pengingat`);
+        }
+        
+        // Render all schedules
+        renderSchedule('kelas10');
+        renderSchedule('kelas11-ipa');
+        renderSchedule('kelas11-ips');
+        renderSchedule('kelas12-ipa');
+        renderSchedule('kelas12-ips');
+    </script>
+</body>
+</html>
